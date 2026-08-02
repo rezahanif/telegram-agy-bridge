@@ -873,9 +873,12 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 
 async def post_init(app):
+    from telegram import BotCommandScopeAllPrivateChats
     commands = [BotCommand(name, desc) for name, desc in telegram_menu_commands()]
     try:
+        await app.bot.delete_my_commands(scope=BotCommandScopeAllPrivateChats())
         await app.bot.set_my_commands(commands)
+        await app.bot.set_my_commands(commands, scope=BotCommandScopeAllPrivateChats())
     except Exception as e:
         log.warning("set_my_commands failed: %s", e)
 
