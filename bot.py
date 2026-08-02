@@ -4,10 +4,18 @@ import subprocess
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8840249393:AAG05JSY4igVc7-7Sdo3qfuhZumeJMRZ7RU")
-ALLOWED_USER_ID = int(os.getenv("TELEGRAM_ALLOWED_USER_ID", "1179211752"))
-AGY_PATH = os.getenv("AGY_PATH", "/home/rezaserver/.local/bin/agy")
-WORKSPACE_DIR = os.getenv("WORKSPACE_DIR", "/home/rezaserver")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+ALLOWED_USER_ID_ENV = os.getenv("TELEGRAM_ALLOWED_USER_ID")
+
+if not TELEGRAM_BOT_TOKEN:
+    raise ValueError("CRITICAL: TELEGRAM_BOT_TOKEN environment variable is missing.")
+
+if not ALLOWED_USER_ID_ENV:
+    raise ValueError("CRITICAL: TELEGRAM_ALLOWED_USER_ID environment variable is missing.")
+
+ALLOWED_USER_ID = int(ALLOWED_USER_ID_ENV)
+AGY_PATH = os.getenv("AGY_PATH", "/root/.local/bin/agy")
+WORKSPACE_DIR = os.getenv("WORKSPACE_DIR", "/project")
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
