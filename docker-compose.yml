@@ -12,9 +12,22 @@ services:
     volumes:
       - /home/rezaserver/project:/project
       - /home/rezaserver/.gemini:/root/.gemini
+      - /var/log/journal:/var/log/journal:ro
+      - /etc/machine-id:/etc/machine-id:ro
+      - /home/rezaserver/.cache/ms-playwright:/root/.cache/ms-playwright:ro
+      - /home/rezaserver/miniconda3/envs/elliott:/opt/conda/envs/elliott:ro
+      - /home/rezaserver/.gitconfig:/root/.gitconfig:ro
+      - /home/rezaserver/.ssh:/root/.ssh:ro
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - hermes-net
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
 networks:
   hermes-net:
