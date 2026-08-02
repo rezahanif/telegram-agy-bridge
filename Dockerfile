@@ -15,7 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Download & install Antigravity CLI (agy) inside container
 RUN curl -fsSL https://antigravity.google/cli/install.sh | sh || true
 
-COPY bot.py .
+COPY bot.py command_registry.py ./
 
 ENV PATH="/root/.local/bin:${PATH}"
 ENV WORKSPACE_DIR="/project"
