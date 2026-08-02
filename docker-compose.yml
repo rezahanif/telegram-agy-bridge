@@ -3,21 +3,18 @@ services:
     build: .
     container_name: telegram-agy-bridge
     restart: always
+    env_file:
+      - .env
     environment:
-      - TELEGRAM_BOT_TOKEN=8840249393:AAG05JSY4igVc7-7Sdo3qfuhZumeJMRZ7RU
-      - TELEGRAM_ALLOWED_USER_ID=1179211752
       - AGY_PATH=/root/.local/bin/agy
       - WORKSPACE_DIR=/project
       - HOME=/root
     volumes:
       - /home/rezaserver/project:/project
-      - agy-config:/root/.gemini
+      - /home/rezaserver/.gemini:/root/.gemini
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - hermes-net
-
-volumes:
-  agy-config:
 
 networks:
   hermes-net:
