@@ -308,7 +308,7 @@ COMMAND_REGISTRY: list[CommandDef] = [
         invocation="standalone",
         agy_subcommand=("changelog",),
         category="info",
-        implemented=False,
+        implemented=True,
     ),
     CommandDef(
         name="install",
@@ -319,7 +319,7 @@ COMMAND_REGISTRY: list[CommandDef] = [
         confirm_prompt="This will modify your shell config and PATH. Continue?",
         destructive=True,
         category="info",
-        implemented=False,
+        implemented=True,
     ),
     CommandDef(
         name="update",
@@ -344,7 +344,7 @@ COMMAND_REGISTRY: list[CommandDef] = [
         invocation="standalone",
         agy_subcommand=("plugin", "list"),
         category="plugin",
-        implemented=False,
+        implemented=True,
     ),
     CommandDef(
         name="plugininstall",
@@ -353,7 +353,7 @@ COMMAND_REGISTRY: list[CommandDef] = [
         invocation="standalone",
         agy_subcommand=("plugin", "install"),  # value appended as final arg
         category="plugin",
-        implemented=False,
+        implemented=True,
     ),
     CommandDef(
         name="pluginuninstall",
@@ -364,7 +364,7 @@ COMMAND_REGISTRY: list[CommandDef] = [
         confirm_prompt="Uninstall this plugin?",
         destructive=True,
         category="plugin",
-        implemented=False,
+        implemented=True,
     ),
     CommandDef(
         name="pluginenable",
@@ -373,7 +373,7 @@ COMMAND_REGISTRY: list[CommandDef] = [
         invocation="standalone",
         agy_subcommand=("plugin", "enable"),
         category="plugin",
-        implemented=False,
+        implemented=True,
     ),
     CommandDef(
         name="plugindisable",
@@ -382,7 +382,7 @@ COMMAND_REGISTRY: list[CommandDef] = [
         invocation="standalone",
         agy_subcommand=("plugin", "disable"),
         category="plugin",
-        implemented=False,
+        implemented=True,
     ),
     CommandDef(
         name="pluginvalidate",
@@ -391,7 +391,7 @@ COMMAND_REGISTRY: list[CommandDef] = [
         invocation="standalone",
         agy_subcommand=("plugin", "validate"),
         category="plugin",
-        implemented=False,
+        implemented=True,
     ),
     CommandDef(
         name="pluginimport",
@@ -400,7 +400,7 @@ COMMAND_REGISTRY: list[CommandDef] = [
         invocation="standalone",
         agy_subcommand=("plugin", "import"),
         category="plugin",
-        implemented=False,
+        implemented=True,
     ),
     CommandDef(
         name="pluginlink",
@@ -409,7 +409,7 @@ COMMAND_REGISTRY: list[CommandDef] = [
         invocation="standalone",
         agy_subcommand=("plugin", "link"),
         category="plugin",
-        implemented=False,
+        implemented=True,
     ),
 ]
 
