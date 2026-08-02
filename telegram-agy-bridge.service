@@ -1,0 +1,15 @@
+[Unit]
+Description=Antigravity CLI Telegram Bridge
+After=network.target
+
+[Service]
+Type=simple
+User=rezaserver
+WorkingDirectory=/home/rezaserver/project/telegram-agy-bridge
+ExecStart=/home/rezaserver/miniconda3/bin/python /home/rezaserver/project/telegram-agy-bridge/bot.py
+Restart=always
+RestartSec=5
+Environment=PATH=/home/rezaserver/.local/bin:/home/rezaserver/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+[Install]
+WantedBy=multi-user.target
