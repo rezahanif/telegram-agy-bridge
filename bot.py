@@ -346,11 +346,26 @@ async def render_picker(bot, picker_id: str) -> None:
                 reply_markup=markup,
             )
             return
-        except BadRequest:
-            pass  # fall through to send new
-    msg = await bot.send_message(
-        chat_id=chat_id, text=text, parse_mode=ParseMode.MARKDOWN, reply_markup=markup
-    )
+        except Exception:
+            try:
+                await bot.edit_message_text(
+                    chat_id=chat_id,
+                    message_id=state["msg_id"],
+                    text=text,
+                    reply_markup=markup,
+                )
+                return
+            except Exception:
+                pass  # fall through to send new
+
+    try:
+        msg = await bot.send_message(
+            chat_id=chat_id, text=text, parse_mode=ParseMode.MARKDOWN, reply_markup=markup
+        )
+    except Exception:
+        msg = await bot.send_message(
+            chat_id=chat_id, text=text, reply_markup=markup
+        )
     state["msg_id"] = msg.message_id
 
 
@@ -776,6 +791,11 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
     if not user_text:
         return
 
+    # If text starts with a slash command, dispatch to generic_command_entry
+    if user_text.startswith("/"):
+        await generic_command_entry(update, context)
+        return
+
     # Consume pending free-text input
     pending = session.get("pending_text_input")
     if pending:
@@ -828,7 +848,7 @@ def main():
         app.add_handler(CommandHandler([cmd.name, *cmd.aliases], generic_command_entry))
 
     app.add_handler(CallbackQueryHandler(button_callback))
-    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_text_message))
+    app.add_handler(MessageHandler(filters.TEXT, handle_text_message))
 
     log.info("Starting bridge with %d registered commands…", len(COMMAND_REGISTRY))
     app.run_polling()
