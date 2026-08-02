@@ -49,25 +49,63 @@ def get_session(chat_id):
         }
     return user_sessions[chat_id]
 
-async def send_model_menu(update: Update, chat_id: int):
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logging.info(f"Handler start triggered by user {update.effective_user.id}")
+    if update.effective_user.id != ALLOWED_USER_ID:
+        await update.message.reply_text("Unauthorized access.")
+        return
+    
+    session = get_session(update.effective_chat.id)
+    await update.message.reply_text(
+        "🚀 Connected to Antigravity CLI Bridge!\n\n"
+        f"• Active Model: {session['model']}\n"
+        f"• Effort Level: {session['effort']}\n\n"
+        "Commands:\n"
+        "• /model - Select AI model\n"
+        "• /effort or /thinking - Select reasoning effort\n"
+        "• /new or /reset - Start a fresh conversation session"
+    )
+
+async def new_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logging.info(f"Handler new_session triggered by user {update.effective_user.id}")
+    if update.effective_user.id != ALLOWED_USER_ID:
+        await update.message.reply_text("Unauthorized access.")
+        return
+    
+    chat_id = update.effective_chat.id
+    session = get_session(chat_id)
+    session["has_active_session"] = False
+    await update.message.reply_text("🔄 Started a new session! Your next message will begin a fresh conversation.")
+
+async def model_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logging.info(f"Handler model_command triggered by user {update.effective_user.id}")
+    if update.effective_user.id != ALLOWED_USER_ID:
+        await update.message.reply_text("Unauthorized access.")
+        return
+
     keyboard = [
         [InlineKeyboardButton(name, callback_data=f"set_model:{model_id}")]
         for name, model_id in AVAILABLE_MODELS
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    session = get_session(chat_id)
+    session = get_session(update.effective_chat.id)
     await update.message.reply_text(
         f"🧠 Select AI Model (Current: {session['model']}):",
         reply_markup=reply_markup
     )
 
-async def send_effort_menu(update: Update, chat_id: int):
+async def effort_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logging.info(f"Handler effort_command triggered by user {update.effective_user.id}")
+    if update.effective_user.id != ALLOWED_USER_ID:
+        await update.message.reply_text("Unauthorized access.")
+        return
+
     keyboard = [
         [InlineKeyboardButton(name, callback_data=f"set_effort:{effort_id}")]
         for name, effort_id in EFFORT_LEVELS
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    session = get_session(chat_id)
+    session = get_session(update.effective_chat.id)
     await update.message.reply_text(
         f"⚡ Select Reasoning Effort (Current: {session['effort']}):",
         reply_markup=reply_markup
@@ -75,7 +113,7 @@ async def send_effort_menu(update: Update, chat_id: int):
 
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    logging.info(f"Callback query received: {query.data} from user {query.from_user.id}")
+    logging.info(f"Handler button_callback triggered: {query.data} from user {query.from_user.id}")
     if query.from_user.id != ALLOWED_USER_ID:
         await query.answer("Unauthorized access.")
         return
@@ -94,61 +132,22 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         session["effort"] = effort_id
         await query.edit_message_text(f"✅ Reasoning Effort set to {effort_id}")
 
-async def handle_any_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not update.message or not update.message.text:
-        return
-
-    user_id = update.effective_user.id
-    chat_id = update.effective_chat.id
-    user_text = update.message.text.strip()
-    logging.info(f"Received text from user {user_id}: {user_text}")
-
-    if user_id != ALLOWED_USER_ID:
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logging.info(f"Handler handle_message triggered by user {update.effective_user.id}")
+    if update.effective_user.id != ALLOWED_USER_ID:
         await update.message.reply_text("Unauthorized access.")
         return
 
+    user_text = update.message.text
+    if not user_text:
+        return
+
+    chat_id = update.effective_chat.id
     session = get_session(chat_id)
 
-    # Dispatch slash commands manually to ensure reliability
-    cmd_lower = user_text.lower()
-    if cmd_lower in ("/start", "/help"):
-        await update.message.reply_text(
-            "🚀 Connected to Antigravity CLI Bridge!\n\n"
-            f"• Active Model: {session['model']}\n"
-            f"• Effort Level: {session['effort']}\n\n"
-            "Commands:\n"
-            "• /model - Select AI model\n"
-            "• /thinking or /effort - Select reasoning effort\n"
-            "• /new or /reset - Start a fresh conversation session"
-        )
-        return
-
-    if cmd_lower in ("/new", "/reset"):
-        session["has_active_session"] = False
-        await update.message.reply_text("🔄 Started a new session! Your next message will begin a fresh conversation.")
-        return
-
-    if cmd_lower.startswith("/model"):
-        parts = user_text.split(maxsplit=1)
-        if len(parts) > 1:
-            session["model"] = parts[1].strip()
-            await update.message.reply_text(f"✅ Model set to {session['model']}")
-        else:
-            await send_model_menu(update, chat_id)
-        return
-
-    if cmd_lower.startswith("/thinking") or cmd_lower.startswith("/effort"):
-        parts = user_text.split(maxsplit=1)
-        if len(parts) > 1 and parts[1].strip() in ("low", "medium", "high"):
-            session["effort"] = parts[1].strip()
-            await update.message.reply_text(f"✅ Reasoning Effort set to {session['effort']}")
-        else:
-            await send_effort_menu(update, chat_id)
-        return
-
-    # Regular message -> Execute agy
     status_msg = await update.message.reply_text("⏳ Thinking...")
 
+    # Build command list
     cmd = [AGY_PATH]
     if session["has_active_session"]:
         cmd.append("--continue")
@@ -172,13 +171,16 @@ async def handle_any_message(update: Update, context: ContextTypes.DEFAULT_TYPE)
         output = process.stdout.strip() or process.stderr.strip() or "Task finished with no output."
         logging.info(f"agy returncode: {process.returncode}, output length: {len(output)}")
         
+        # Mark session as active so subsequent messages continue context
         session["has_active_session"] = True
 
+        # Delete status message
         try:
             await status_msg.delete()
         except Exception:
             pass
 
+        # Split output if exceeding Telegram message size limit (4096 chars)
         if len(output) > 4000:
             for chunk in [output[i:i+4000] for i in range(0, len(output), 4000)]:
                 await update.message.reply_text(f"```\n{chunk}\n```", parse_mode="Markdown")
@@ -192,9 +194,17 @@ async def handle_any_message(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 def main():
     app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
+    
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("new", new_session))
+    app.add_handler(CommandHandler("reset", new_session))
+    app.add_handler(CommandHandler("model", model_command))
+    app.add_handler(CommandHandler("effort", effort_command))
+    app.add_handler(CommandHandler("thinking", effort_command))
     app.add_handler(CallbackQueryHandler(button_callback))
-    app.add_handler(MessageHandler(filters.ALL, handle_any_message))
-    logging.info("Starting Persistent Telegram Antigravity Bridge Bot...")
+    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
+    
+    logging.info("Starting Persistent Telegram Antigravity Bridge Bot with Model & Effort controls...")
     app.run_polling()
 
 if __name__ == "__main__":
