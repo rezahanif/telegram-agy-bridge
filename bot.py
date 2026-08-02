@@ -153,6 +153,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         cmd.append("--continue")
     
     cmd.extend([
+        "--dangerously-skip-permissions",
         "--model", session["model"],
         "--effort", session["effort"],
         "-p", user_text
