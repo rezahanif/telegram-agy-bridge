@@ -23,7 +23,6 @@ logging.basicConfig(
 )
 
 # Session configuration per chat
-# key: chat_id, value: dict(has_active_session=bool, model=str, effort=str)
 user_sessions = {}
 
 AVAILABLE_MODELS = [
@@ -63,7 +62,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Commands:\n"
         "• /model - Select AI model\n"
         "• /effort or /thinking - Select reasoning effort (low/medium/high)\n"
-        "• /new or /reset - Start a fresh conversation session"
+        "• /new or /reset - Start a fresh conversation session",
+        parse_mode="Markdown"
     )
 
 async def new_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -89,8 +89,7 @@ async def model_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session = get_session(update.effective_chat.id)
     await update.message.reply_text(
         f"🧠 Select AI Model (Current: `{session['model']}`):",
-        reply_markup=reply_markup,
-        parse_mode="Markdown"
+        reply_markup=reply_markup
     )
 
 async def effort_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -106,8 +105,7 @@ async def effort_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session = get_session(update.effective_chat.id)
     await update.message.reply_text(
         f"⚡ Select Reasoning Effort (Current: `{session['effort']}`):",
-        reply_markup=reply_markup,
-        parse_mode="Markdown"
+        reply_markup=reply_markup
     )
 
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -124,11 +122,11 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data.startswith("set_model:"):
         model_id = data.split("set_model:")[1]
         session["model"] = model_id
-        await query.edit_message_text(f"✅ Model set to `{model_id}`", parse_mode="Markdown")
+        await query.edit_message_text(f"✅ Model set to {model_id}")
     elif data.startswith("set_effort:"):
         effort_id = data.split("set_effort:")[1]
         session["effort"] = effort_id
-        await query.edit_message_text(f"✅ Reasoning Effort set to `{effort_id}`", parse_mode="Markdown")
+        await query.edit_message_text(f"✅ Reasoning Effort set to {effort_id}")
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ALLOWED_USER_ID:
