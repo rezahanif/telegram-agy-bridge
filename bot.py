@@ -500,10 +500,13 @@ async def execute_command(
 
     # standalone
     if cmd_def.agy_subcommand == ():
-        # In-process commands (e.g. /stop, /status, /help) — handle by name
+        # In-process commands (e.g. /stop, /status, /help, /start)
         if cmd_def.name == "stop":
             return await _cmd_stop(reply, chat_id)
-        # others fall through to "not implemented"
+        elif cmd_def.name == "status":
+            return await _cmd_status(reply, chat_id, session)
+        elif cmd_def.name in ("help", "start"):
+            return await _cmd_help(reply)
         await reply(f"⚠️ /{cmd_def.name} not implemented yet.", None)
         return "not implemented"
 
@@ -529,6 +532,45 @@ async def _cmd_stop(reply, chat_id: int) -> str:
     except ProcessLookupError:
         await reply("Process already exited.", None)
         return "already exited"
+
+
+async def _cmd_status(reply, chat_id: int, session: dict) -> str:
+    active = "🟢 Active" if session.get("has_active_session") else "⚫ Inactive (New)"
+    flags = session.get("flags", {})
+    flag_lines = []
+    if flags:
+        for k, v in flags.items():
+            if v is True:
+                flag_lines.append(f"  • `{k}`: ON")
+            elif isinstance(v, list):
+                flag_lines.append(f"  • `{k}`: {', '.join(v)}")
+            else:
+                flag_lines.append(f"  • `{k}`: {v}")
+    else:
+        flag_lines.append("  (none - defaults active)")
+
+    text = (
+        f"📊 *Session Status*\n\n"
+        f"• *Session Context*: {active}\n"
+        f"• *Active Flags*:\n" + "\n".join(flag_lines)
+    )
+    await reply(text, None)
+    return text
+
+
+async def _cmd_help(reply) -> str:
+    from command_registry import commands_by_category
+    cats = commands_by_category()
+    lines = ["🚀 *Antigravity CLI Commands*\n"]
+    for cat_name, cmds in cats.items():
+        lines.append(f"*{cat_name.upper()}*")
+        for c in cmds:
+            status = "" if c.implemented else " _(pending)_"
+            lines.append(f"  • /{c.name} - {c.description}{status}")
+        lines.append("")
+    text = "\n".join(lines)
+    await reply(text, None)
+    return text
 
 
 # ---------------------------------------------------------------------------

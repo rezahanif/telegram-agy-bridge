@@ -185,7 +185,7 @@ COMMAND_REGISTRY: list[CommandDef] = [
         invocation="standalone",
         agy_subcommand=(),  # no agy call — reads in-memory session
         category="session",
-        implemented=False,
+        implemented=True,
     ),
     CommandDef(
         name="help",
@@ -195,7 +195,7 @@ COMMAND_REGISTRY: list[CommandDef] = [
         invocation="standalone",
         agy_subcommand=(),
         category="session",
-        implemented=False,
+        implemented=True,
     ),
     CommandDef(
         name="start",
@@ -204,7 +204,7 @@ COMMAND_REGISTRY: list[CommandDef] = [
         invocation="standalone",
         agy_subcommand=(),
         category="session",
-        implemented=False,
+        implemented=True,
     ),
 
     # ============================================================
