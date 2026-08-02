@@ -115,7 +115,14 @@ def build_session_agy_cmd(session: dict, prompt: str) -> list[str]:
     cmd: list[str] = [AGY_PATH]
     if session["has_active_session"]:
         cmd.append("--continue")
-    for flag, value in session["flags"].items():
+    
+    # Always include --dangerously-skip-permissions for headless Telegram bot execution
+    # unless --mode or another conflicting flag is explicitly active
+    flags = dict(session["flags"])
+    if "--dangerously-skip-permissions" not in flags and "--mode" not in flags:
+        flags["--dangerously-skip-permissions"] = True
+
+    for flag, value in flags.items():
         if value is True:
             # bare toggle flag (e.g. --sandbox, --debug)
             cmd.append(flag)
