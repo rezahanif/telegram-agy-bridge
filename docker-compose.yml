@@ -13,6 +13,7 @@ services:
       - /home/rezaserver/project:/project
       - /home/rezaserver/obsidian/vaults:/obsidian-vaults
       - /home/rezaserver/codebase-memory-mcp:/codebase-memory-mcp
+      - /home/rezaserver/.cache/codebase-memory-mcp:/root/.cache/codebase-memory-mcp
       - /home/rezaserver/.gemini:/root/.gemini
       - /var/log/journal:/var/log/journal:ro
       - /etc/machine-id:/etc/machine-id:ro
