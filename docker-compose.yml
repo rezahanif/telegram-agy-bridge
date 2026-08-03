@@ -11,6 +11,7 @@ services:
       - HOME=/root
     volumes:
       - /home/rezaserver/project:/project
+      - /home/rezaserver/obsidian/vaults:/obsidian-vaults
       - /home/rezaserver/.gemini:/root/.gemini
       - /var/log/journal:/var/log/journal:ro
       - /etc/machine-id:/etc/machine-id:ro
